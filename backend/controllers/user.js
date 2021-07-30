@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const passport = require('passport')
 
 /* exports.signup = (req, res, next) => {
     bcrypt
@@ -51,12 +52,15 @@ function validatePassword(password) {
 
 /* CONFIRM PASSWORD */
 
-
 /* MIDDLEWARE */
 
 exports.signup = (req, res, next) => {
-  var confirmPassword = req.body.password === req.body.confirmpassword;
-  if (validateEmail(req.body.mail) && validatePassword(req.body.password) && confirmPassword){
+  var confirmPassword = req.body.password === req.body.confirmpassword
+  if (
+    validateEmail(req.body.mail) &&
+    validatePassword(req.body.password) &&
+    confirmPassword
+  ) {
     User.findOne({
       where: { email: req.body.mail },
     })
@@ -78,11 +82,10 @@ exports.signup = (req, res, next) => {
         res.status(401).json({ message: 'Account already exist' })
       })
       .catch((error) => res.status(500).json({ error }))
-  }else {
-    res.status(401).json({message: "Error occured"})
+  } else {
+    res.status(401).json({ message: 'Error occured ' })
   }
-  }
-  
+}
 
 exports.login = (req, res, next) => {
   User.findOne({
@@ -104,8 +107,13 @@ exports.login = (req, res, next) => {
               expiresIn: '24h',
             }),
           })
+          
         })
         .catch((error) => res.status(500).json({ error }))
     })
     .catch((error) => res.status(500).json({ error }))
 }
+
+
+
+
