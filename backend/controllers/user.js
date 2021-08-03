@@ -39,7 +39,7 @@ function validateEmail(email) {
 
 function validatePassword(password) {
   var passwordReg = new RegExp(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$/
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/
   )
   var valid = passwordReg.test(password)
 
@@ -75,7 +75,7 @@ exports.signup = (req, res, next) => {
             })
             user
               .save()
-              .then(() => res.status(201).json({ message: 'new User' }))
+              .then((user) => res.status(201).json({ userId: user.id }))
               .catch((error) => res.status(500).json({ error }))
           })
         }
@@ -107,13 +107,65 @@ exports.login = (req, res, next) => {
               expiresIn: '24h',
             }),
           })
-          
         })
         .catch((error) => res.status(500).json({ error }))
     })
     .catch((error) => res.status(500).json({ error }))
 }
 
+exports.update = (req, res, next) => {
+  User.findOne({
+    where: { id: req.params.id },
+  })
+    .then((user) =>
+      res.status(200).json({
+        userId: user.id,
+        nom: user.nom,
+        prenom: user.prenom,
+        email: user.email,
+        bio: user.bio,
+      })
+    )
+    .catch((error) => res.status(404).json({ error }))
+}
 
+exports.modify = (req, res, next) => {
+  User.update({ ...req.body }, { where: { id: req.params.id } })
+    .then(() => res.status(200).json({ message: 'Thing updated' }))
+    .catch((error) => res.status(404).json({ error }))
+}
 
+exports.deleteProfile = (req, res, next) => {
+  User.destroy({
+    where: { id: req.params.id },
+  })
+    .then(() => res.status(200).json({ message: 'User deleted' }))
+    .catch((error) => res.status(400).json({ error }))
+}
 
+exports.getPassword = (req, res, next) => {
+  User.findOne({ where: { id: req.params.id } })
+    .then((user) => res.status(200).json({ password: user.password }))
+    .catch((error) => res.status(400).json({ error }))
+}
+
+exports.changePassword = (req, res, next) => {
+  User.findOne({
+    where: { id: req.params.id },
+  })
+  .then((user) => {
+    bcrypt.compare(req.body.oldpassword, user.password)
+    .then((valid) => {
+      if(!valid){
+        return res.status(404).json({message: "Old password is incorrect"})
+      }
+      bcrypt.hash(req.body.password, 10)
+      .then((hash) => { 
+        User.update({password:hash}, {where: { id: req.params.id }})
+        .then(() => res.status(200).json({message: "Password updated successfully"}))
+      })
+      .catch(error => res.status(404).json({error}))
+      })
+      .catch(() => res.status(404).json({message: "Password doesn't change"}))
+    })
+  }

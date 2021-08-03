@@ -28,6 +28,14 @@ const User = sequelize.define('user', {
     autoIncrement: true,
     primaryKey: true,
   },
+  bio: {
+    type: DataTypes.STRING,
+    allowNull: true, 
+  }, 
+  avatar: {
+    type:DataTypes.STRING,
+    allowNull: true, 
+  }
 })
 
 User.sync()

@@ -2,6 +2,7 @@ const express = require('express')
 const { Sequelize, DataTypes, Model } = require('sequelize')
 const bodyParser = require('body-parser')
 const userRoutes = require('./routes/user')
+const path = require('path')
 
 const app = express()
 const sequelize = new Sequelize('groupomania', 'root', 'Eti&300508', {
@@ -31,5 +32,6 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json())
 app.use('/api/auth', userRoutes)
+app.use('/image', express.static(path.join(__dirname, 'image')))
 
 module.exports = app
