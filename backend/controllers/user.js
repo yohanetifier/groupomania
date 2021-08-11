@@ -1,7 +1,7 @@
 const User = require('../models/User')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const passport = require('passport')
+const fs = require('fs')
 
 /* exports.signup = (req, res, next) => {
     bcrypt
@@ -124,15 +124,30 @@ exports.update = (req, res, next) => {
         prenom: user.prenom,
         email: user.email,
         bio: user.bio,
+        avatar: user.avatar
       })
     )
     .catch((error) => res.status(404).json({ error }))
 }
 
 exports.modify = (req, res, next) => {
-  User.update({ ...req.body }, { where: { id: req.params.id } })
+  const userObject = req.file ? 
+  { bio: req.body.bio, avatar: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`} : {...req.body}
+  User.findOne({where : { id: req.params.id }})
+  .then((user) => {
+    if(user.avatar){
+      const filename = user.avatar.split('/images/')[1]
+      fs.unlink(`images/${filename}`, () => {
+        console.log('file deleted')
+      })
+    }
+    User.update({ ...userObject}, { where: { id: req.params.id } })
     .then(() => res.status(200).json({ message: 'Thing updated' }))
     .catch((error) => res.status(404).json({ error }))
+  })
+  /* User.update({ ...userObject}, { where: { id: req.params.id } })
+    .then(() => res.status(200).json({ message: 'Thing updated' }))
+    .catch((error) => res.status(404).json({ error })) */
 }
 
 exports.deleteProfile = (req, res, next) => {

@@ -30,14 +30,15 @@ const User = sequelize.define('user', {
   },
   bio: {
     type: DataTypes.STRING,
-    allowNull: true, 
-  }, 
+    allowNull: true,
+  },
   avatar: {
-    type:DataTypes.STRING,
-    allowNull: true, 
-  }
+    type:  DataTypes.STRING,
+    allowNull: true,
+  }, 
 })
 
 User.sync()
 
 module.exports = User
+
