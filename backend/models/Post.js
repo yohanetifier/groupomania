@@ -12,6 +12,7 @@ const Post = sequelize.define('post', {
         primaryKey: true, 
         autoIncrement: true, 
         allowNull: false,
+        
     }, 
     imageUrl: {
         type: DataTypes.STRING,
@@ -21,10 +22,6 @@ const Post = sequelize.define('post', {
         type: DataTypes.INTEGER.UNSIGNED, 
         allowNull: true, 
     }, 
-    dislikes: {
-        type: DataTypes.INTEGER.UNSIGNED,
-        allowNull: true, 
-    }, 
     user_id: {
         type: DataTypes.INTEGER.UNSIGNED, 
         allowNull: false, 
@@ -32,14 +29,28 @@ const Post = sequelize.define('post', {
             model: User, 
             key: 'id', 
         }
+    },
+    dislikes: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: true, 
     }, 
     description: {
         type: DataTypes.STRING,
         allowNull: false,
     }
-
+    
 })
 
+User.hasOne(Post, {foreignKey: 'user_id'})
+Post.belongsTo(User, {foreignKey: 'user_id'})
 Post.sync()
 
 module.exports = Post
+
+/* user_id: {
+    type: DataTypes.INTEGER.UNSIGNED, 
+    allowNull: false, 
+    references: {
+        model: User, 
+        key: 'id', 
+    } */

@@ -3,9 +3,11 @@ const { Sequelize, DataTypes, Model } = require('sequelize')
 const bodyParser = require('body-parser')
 const userRoutes = require('./routes/user')
 const postRoutes = require('./routes/post')
+const actionRoutes = require('./routes/action')
 const path = require('path')
 const User = require('../backend/models/User')
 const Post = require('../backend/models/Post')
+const Action = require('./models/Action')
 
 const app = express()
 const sequelize = new Sequelize('groupomania', 'root', 'Eti&300508', {
@@ -41,6 +43,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json())
 app.use('/api/auth', userRoutes)
 app.use('/api/post', postRoutes)
+app.use('/api/post/action', actionRoutes)
 app.use('/images', express.static(path.join(__dirname, 'images')))
 
 

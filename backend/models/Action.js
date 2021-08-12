@@ -8,6 +8,12 @@ const Post = require('./Post')
 const User= require('./User')
 
 const Action = sequelize.define('action', {
+    comment_id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true,
+    },
     id:{
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
@@ -30,6 +36,6 @@ const Action = sequelize.define('action', {
     }
 })
 
-Action.sync()
+
 
 module.exports = Action;  
