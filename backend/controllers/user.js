@@ -124,26 +124,39 @@ exports.update = (req, res, next) => {
         prenom: user.prenom,
         email: user.email,
         bio: user.bio,
-        avatar: user.avatar
+        avatar: user.avatar,
+        admin: user.admin,
       })
     )
     .catch((error) => res.status(404).json({ error }))
 }
 
 exports.modify = (req, res, next) => {
-  const userObject = req.file ? 
-  { bio: req.body.bio, avatar: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`} : {...req.body}
-  User.findOne({where : { id: req.params.id }})
-  .then((user) => {
-    if(user.avatar){
+  const userObject = req.file
+    ? {
+        bio: req.body.bio,
+        avatar: `${req.protocol}://${req.get('host')}/images/${
+          req.file.filename
+        }`,
+      }
+    : { ...req.body }
+  User.findOne({ where: { id: req.params.id } }).then((user) => {
+    if (user.avatar && req.file) {
       const filename = user.avatar.split('/images/')[1]
       fs.unlink(`images/${filename}`, () => {
         console.log('file deleted')
       })
     }
-    User.update({ ...userObject}, { where: { id: req.params.id } })
+    if (req.body.bio || req.file) {
+      User.update({ ...userObject }, { where: { id: req.params.id } })
+        .then(() => res.status(200).json({ message: 'Thing updated' }))
+        .catch((error) => res.status(404).json({ error }))
+    } else {
+      return res.status(404).json({ message: 'Nothing updated' })
+    }
+    /* User.update({ ...userObject}, { where: { id: req.params.id } })
     .then(() => res.status(200).json({ message: 'Thing updated' }))
-    .catch((error) => res.status(404).json({ error }))
+    .catch((error) => res.status(404).json({ error })) */
   })
   /* User.update({ ...userObject}, { where: { id: req.params.id } })
     .then(() => res.status(200).json({ message: 'Thing updated' }))
@@ -151,10 +164,20 @@ exports.modify = (req, res, next) => {
 }
 
 exports.deleteProfile = (req, res, next) => {
-  User.destroy({
+  User.findOne({
     where: { id: req.params.id },
   })
-    .then(() => res.status(200).json({ message: 'User deleted' }))
+    .then((user) => {
+      if (user.avatar) {
+        const filename = user.avatar.split('/images/')[1]
+        fs.unlink(`images/${filename}`, () => {
+          console.log('file deleted')
+        })
+      }
+      user.destroy({
+        where: { id: req.params.id },
+      })
+    })
     .catch((error) => res.status(400).json({ error }))
 }
 
@@ -167,20 +190,25 @@ exports.getPassword = (req, res, next) => {
 exports.changePassword = (req, res, next) => {
   User.findOne({
     where: { id: req.params.id },
+  }).then((user) => {
+    bcrypt
+      .compare(req.body.oldpassword, user.password)
+      .then((valid) => {
+        if (!valid) {
+          return res.status(404).json({ message: 'Old password is incorrect' })
+        }
+        bcrypt
+          .hash(req.body.password, 10)
+          .then((hash) => {
+            User.update(
+              { password: hash },
+              { where: { id: req.params.id } }
+            ).then(() =>
+              res.status(200).json({ message: 'Password updated successfully' })
+            )
+          })
+          .catch((error) => res.status(404).json({ error }))
+      })
+      .catch(() => res.status(404).json({ message: "Password doesn't change" }))
   })
-  .then((user) => {
-    bcrypt.compare(req.body.oldpassword, user.password)
-    .then((valid) => {
-      if(!valid){
-        return res.status(404).json({message: "Old password is incorrect"})
-      }
-      bcrypt.hash(req.body.password, 10)
-      .then((hash) => { 
-        User.update({password:hash}, {where: { id: req.params.id }})
-        .then(() => res.status(200).json({message: "Password updated successfully"}))
-      })
-      .catch(error => res.status(404).json({error}))
-      })
-      .catch(() => res.status(404).json({message: "Password doesn't change"}))
-    })
-  }
+}

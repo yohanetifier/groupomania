@@ -14,14 +14,14 @@ const Action = sequelize.define('action', {
         primaryKey: true,
         autoIncrement: true,
     },
-    id:{
+    post_id:{
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
             model: Post, 
             key:'id',
         }
-    }, 
+    },
     user_id: {
         type: DataTypes.INTEGER.UNSIGNED, 
         allowNul: false, 
@@ -36,6 +36,11 @@ const Action = sequelize.define('action', {
     }
 })
 
+Post.hasOne(Action, {foreignKey: 'post_id'})
+Action.belongsTo(Post, {foreignKey: 'post_id'})
+User.hasOne(Action, {foreignKey: 'user_id'})
+Action.belongsTo(User, {foreignKey: 'user_id'})
 
+Action.sync()
 
 module.exports = Action;  

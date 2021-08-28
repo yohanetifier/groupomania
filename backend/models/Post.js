@@ -16,7 +16,7 @@ const Post = sequelize.define('post', {
     }, 
     imageUrl: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     }, 
     likes: {
         type: DataTypes.INTEGER.UNSIGNED, 

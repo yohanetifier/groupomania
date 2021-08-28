@@ -35,7 +35,11 @@ const User = sequelize.define('user', {
   avatar: {
     type:  DataTypes.STRING,
     allowNull: true,
-  }, 
+  },
+  admin: {
+    type: DataTypes.BOOLEAN, 
+    defaultValue: false
+  } 
 })
 
 User.sync()
