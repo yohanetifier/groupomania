@@ -6,6 +6,7 @@ const auth = require('../middleware/auth')
 router.post('/', auth, actionCtrl.create)
 router.get('/interaction', auth, actionCtrl.getAllActions)
 router.get('/:id', auth, actionCtrl.getAllActionByPostId)
+router.get('/post/:id', auth, actionCtrl.getCounterOfActionsById)
 router.delete('/delete/:id', auth, actionCtrl.deleteOneAction)
 
 module.exports = router

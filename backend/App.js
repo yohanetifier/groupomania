@@ -8,9 +8,12 @@ const path = require('path')
 const User = require('../backend/models/User')
 const Post = require('../backend/models/Post')
 const Action = require('./models/Action')
+const helmet = require('helmet')
+require('dotenv').config()
+
 
 const app = express()
-const sequelize = new Sequelize('groupomania', 'root', 'Eti&300508', {
+const sequelize = new Sequelize(process.env.Database, process.env.DB_USER, process.env.DB_PASSWORD, {
   dialect: 'mysql',
   host: 'localhost',
 })
@@ -39,7 +42,7 @@ app.use((req, res, next) => {
   next()
 })
 
-
+app.use(helmet())
 app.use(bodyParser.json())
 app.use('/api/auth', userRoutes)
 app.use('/api/post', postRoutes)

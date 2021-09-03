@@ -54,3 +54,16 @@ exports.deleteOnePost = (req, res ,next ) => {
   })
   .catch(error => res.status(400).json({error}))
 }
+
+exports.getPostByUserId = (req, res, next ) => {
+  Post.findAll({ 
+    where : {user_id: req.params.userId}, order: [['createdAt', 'DESC']], include: {model: User, required: true}})
+  .then((post) => res.status(200).json(post))
+  .catch((error) => res.status(400).json({ error }))
+}
+
+exports.getALlPosts = (req, res, next ) => {
+  Post.findAll()
+  .then((post) => res.status(200).json(post))
+  .catch((error) => res.status(400).json({error}))
+}

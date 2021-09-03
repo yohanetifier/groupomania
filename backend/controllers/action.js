@@ -18,22 +18,31 @@ exports.getAllActionByPostId = (req, res, next) => {
   Action.findAll({
     where: { post_id: req.params.id },
     include: [Post, User],
+    order: [['createdAt', 'DESC']],
     required: true,
   })
     .then((action) => res.status(200).json(action))
     .catch((error) => res.status(404).json({ error }))
 }
 
-exports.getAllActions = (req, res, next ) => {
+exports.getAllActions = (req, res, next) => {
   Action.findAll()
-  .then((action) => res.status(200).json(action))
-  .catch(error => res.status(404).json({error }))
+    .then((action) => res.status(200).json(action))
+    .catch((error) => res.status(404).json({ error }))
 }
 
 exports.deleteOneAction = (req, res, next) => {
   Action.destroy({
-    where: {comment_id: req.params.id }
+    where: { comment_id: req.params.id },
   })
-  .then(() => res.status(200).json({message: 'Comment deleted'}))
-  .catch(error => res.status(400).json({error}))
+    .then(() => res.status(200).json({ message: 'Comment deleted' }))
+    .catch((error) => res.status(400).json({ error }))
+}
+
+exports.getCounterOfActionsById = (req, res, next) => {
+  Action.findAndCountAll({
+    where: { post_id: req.params.id },
+  })
+    .then((result) => res.status(200).json(result))
+    .catch((error) => res.status(400).json({ error }))
 }

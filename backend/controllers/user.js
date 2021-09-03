@@ -3,24 +3,6 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const fs = require('fs')
 
-/* exports.signup = (req, res, next) => {
-    bcrypt
-    .hash(req.body.password, 10)
-    .then((hash) => {
-      const user = User.build({
-        nom: req.body.nom,
-        prenom: req.body.prenom,
-        email: req.body.mail,
-        password: hash,
-      })
-      user
-        .save()
-        .then(() => res.status(201).json({ message: 'new User' }))
-        .catch((error) => res.status(500).json({ error }))
-    })
-    .catch((error) => res.status(500).json({ error }))
-  
-} */
 
 /* VALIDATION EMAIL */
 
@@ -103,7 +85,7 @@ exports.login = (req, res, next) => {
           }
           res.status(200).json({
             userId: user.id,
-            token: jwt.sign({ userId: user.id }, 'SECRET_RANDOM_KEY', {
+            token: jwt.sign({ userId: user.id }, process.env.TOKEN, {
               expiresIn: '24h',
             }),
           })
@@ -154,13 +136,7 @@ exports.modify = (req, res, next) => {
     } else {
       return res.status(404).json({ message: 'Nothing updated' })
     }
-    /* User.update({ ...userObject}, { where: { id: req.params.id } })
-    .then(() => res.status(200).json({ message: 'Thing updated' }))
-    .catch((error) => res.status(404).json({ error })) */
   })
-  /* User.update({ ...userObject}, { where: { id: req.params.id } })
-    .then(() => res.status(200).json({ message: 'Thing updated' }))
-    .catch((error) => res.status(404).json({ error })) */
 }
 
 exports.deleteProfile = (req, res, next) => {
@@ -211,4 +187,10 @@ exports.changePassword = (req, res, next) => {
       })
       .catch(() => res.status(404).json({ message: "Password doesn't change" }))
   })
+}
+
+exports.getAllUsers = (req, res, next ) => {
+  User.findAll()
+  .then((user) => res.status(200).json(user))
+  .catch((error) => res.status(400).json({error}))
 }
