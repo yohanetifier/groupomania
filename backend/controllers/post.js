@@ -8,15 +8,8 @@ exports.create = (req, res, next) => {
     imageUrl: `${req.protocol}://${req.get('host')}/images/${
       req.file.filename
     }`,
-    user_id: req.body.user_id,
-  })) : (Post.build({  description: req.body.description, user_id: req.body.user_id, }))
-  /* const post = Post.build({
-    description: req.body.description,
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${
-      req.file.filename
-    }`,
-    user_id: req.body.user_id,
-  }) */
+    user_id: req.token.userId,
+  })) : (Post.build({  description: req.body.description, user_id: req.token.userId, }))
   post
     .save()
     .then(() => res.status(201).json({ message: 'Post created' }))
@@ -42,15 +35,20 @@ exports.deleteOnePost = (req, res ,next ) => {
     where: {id: req.params.id}
   })
   .then((post) => {
-    if (post.imageUrl){
-      const filename = post.imageUrl.split('/images/')[1]
-      fs.unlink(`images/${filename}`, () => {
-        console.log('file deleted')
-      })
+    if (post.user_id === req.token.userId || req.token.admin){
+      if (post.imageUrl){
+        const filename = post.imageUrl.split('/images/')[1]
+        fs.unlink(`images/${filename}`, () => {
+          console.log('file deleted')
+        })
+      }
+      post.destroy({where: { id: req.params.id }})
+      .then(() => res.status(200).json({message: "Post deleted"}))
+      .catch(error => res.status(400).json({error}))
+    }else {
+      res.status(403).json({message: "Vous n'avez pas les droits pour supprimer ce post"})
     }
-    post.destroy({where: { id: req.params.id }})
-    .then(() => res.status(200).json({message: "Post deleted"}))
-    .catch(error => res.status(400).json({error}))
+    
   })
   .catch(error => res.status(400).json({error}))
 }

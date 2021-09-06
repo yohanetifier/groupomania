@@ -85,7 +85,7 @@ exports.login = (req, res, next) => {
           }
           res.status(200).json({
             userId: user.id,
-            token: jwt.sign({ userId: user.id }, process.env.TOKEN, {
+            token: jwt.sign({ userId: user.id, admin:user.admin }, process.env.TOKEN, {
               expiresIn: '24h',
             }),
           })
@@ -123,19 +123,24 @@ exports.modify = (req, res, next) => {
       }
     : { ...req.body }
   User.findOne({ where: { id: req.params.id } }).then((user) => {
-    if (user.avatar && req.file) {
-      const filename = user.avatar.split('/images/')[1]
-      fs.unlink(`images/${filename}`, () => {
-        console.log('file deleted')
-      })
+    if (user.id === req.token.userId){
+      if (user.avatar && req.file) {
+        const filename = user.avatar.split('/images/')[1]
+        fs.unlink(`images/${filename}`, () => {
+          console.log('file deleted')
+        })
+      }
+      if (req.body.bio || req.file) {
+        User.update({ ...userObject }, { where: { id: req.params.id } })
+          .then(() => res.status(200).json({ message: 'Thing updated' }))
+          .catch((error) => res.status(404).json({ error }))
+      } else {
+        return res.status(404).json({ message: 'Nothing updated' })
+      }
+    }else {
+      res.status(403).json({message : "Vous n'avez pas les droits pour faire cette opération"})
     }
-    if (req.body.bio || req.file) {
-      User.update({ ...userObject }, { where: { id: req.params.id } })
-        .then(() => res.status(200).json({ message: 'Thing updated' }))
-        .catch((error) => res.status(404).json({ error }))
-    } else {
-      return res.status(404).json({ message: 'Nothing updated' })
-    }
+    
   })
 }
 
@@ -144,15 +149,19 @@ exports.deleteProfile = (req, res, next) => {
     where: { id: req.params.id },
   })
     .then((user) => {
-      if (user.avatar) {
-        const filename = user.avatar.split('/images/')[1]
-        fs.unlink(`images/${filename}`, () => {
-          console.log('file deleted')
+      if (user.id === req.token.userId){
+        if (user.avatar) {
+          const filename = user.avatar.split('/images/')[1]
+          fs.unlink(`images/${filename}`, () => {
+            console.log('file deleted')
+          })
+        }
+        user.destroy({
+          where: { id: req.params.id },
         })
+      }else {
+        res.status(403).json({message: "Vous n'avez pas les droits pour supprimer l'utilisateur"})
       }
-      user.destroy({
-        where: { id: req.params.id },
-      })
     })
     .catch((error) => res.status(400).json({ error }))
 }
@@ -167,7 +176,8 @@ exports.changePassword = (req, res, next) => {
   User.findOne({
     where: { id: req.params.id },
   }).then((user) => {
-    bcrypt
+    if(user.id === req.token.userId){
+      bcrypt
       .compare(req.body.oldpassword, user.password)
       .then((valid) => {
         if (!valid) {
@@ -186,6 +196,9 @@ exports.changePassword = (req, res, next) => {
           .catch((error) => res.status(404).json({ error }))
       })
       .catch(() => res.status(404).json({ message: "Password doesn't change" }))
+    }else {
+      res.status(403).json({message: "Vous n'etes pas autorisé à changer le mot de passe"})
+    } 
   })
 }
 
