@@ -12,8 +12,8 @@ const limiter = rateLimit({
 })
 
 router.post('/signup', userCtrl.signup)
-router.post('/login/', limiter, userCtrl.login)
-router.get('/users', auth, userCtrl.getAllUsers)
+router.post('/login/', userCtrl.login)
+router.get('/users', userCtrl.getAllUsers)
 router.get('/update/:id', auth, multer, userCtrl.update)
 router.put('/modify/:id', auth, multer, userCtrl.modify)
 router.delete('/deleteprofile/:id', auth, userCtrl.deleteProfile)

@@ -65,3 +65,21 @@ exports.getALlPosts = (req, res, next ) => {
   .then((post) => res.status(200).json(post))
   .catch((error) => res.status(400).json({error}))
 }
+
+exports.getLike = (req, res, next) => {
+  Post.findOne({where: {
+    id : req.params.postId
+  }})
+  .then((post) => {
+    if (req.body.like === 1){
+      post.increment('likes')
+      post.usersLiked.push(req.body.userId)
+      res.status(200).json({message:'Like added'})
+    }else {
+      post.update({usersLiked:null})
+      post.decrement('likes')
+      res.status(200).json({message: 'Like canceled'})
+    }
+  })
+  .catch((error) => res.status(400).json({error}))
+}

@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require('sequelize')
+const { Sequelize, DataTypes, ABSTRACT } = require('sequelize')
 const sequelize = new Sequelize('groupomania', 'root', 'Eti&300508', {
   dialect: 'mysql',
   host: 'localhost',
@@ -18,10 +18,6 @@ const Post = sequelize.define('post', {
         type: DataTypes.STRING,
         allowNull: true,
     }, 
-    likes: {
-        type: DataTypes.INTEGER.UNSIGNED, 
-        allowNull: true, 
-    }, 
     user_id: {
         type: DataTypes.INTEGER.UNSIGNED, 
         allowNull: false, 
@@ -30,14 +26,10 @@ const Post = sequelize.define('post', {
             key: 'id', 
         }
     },
-    dislikes: {
-        type: DataTypes.INTEGER.UNSIGNED,
-        allowNull: true, 
-    }, 
     description: {
         type: DataTypes.STRING,
         allowNull: false,
-    }
+    }, 
     
 })
 
@@ -46,11 +38,3 @@ Post.belongsTo(User, {foreignKey: 'user_id'})
 Post.sync()
 
 module.exports = Post
-
-/* user_id: {
-    type: DataTypes.INTEGER.UNSIGNED, 
-    allowNull: false, 
-    references: {
-        model: User, 
-        key: 'id', 
-    } */
